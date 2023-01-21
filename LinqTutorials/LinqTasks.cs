@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace LinqTutorials
 {
@@ -234,7 +235,7 @@ namespace LinqTutorials
         /// </summary>
         public static IEnumerable<object> Task7()
         {
-            IEnumerable<object> result = null;
+            var result = Emps.GroupBy(e => e.Job).Select(group => new { Praca = group.Key, LiczbaPracownikow = group.Count() });
             return result;
         }
 
@@ -244,7 +245,7 @@ namespace LinqTutorials
         /// </summary>
         public static bool Task8()
         {
-            bool result = false;
+            bool result = Emps.Any(e => e.Job.Equals("Backend programmer"));
             return result;
         }
 
@@ -254,7 +255,7 @@ namespace LinqTutorials
         /// </summary>
         public static Emp Task9()
         {
-            Emp result = null;
+            Emp result = Emps.Where(e => e.Job.Equals("Frontend programmer")).OrderByDescending(e => e.HireDate).FirstOrDefault();
             return result;
         }
 
@@ -265,7 +266,7 @@ namespace LinqTutorials
         /// </summary>
         public static IEnumerable<object> Task10()
         {
-            IEnumerable<object> result = null;
+            IEnumerable<object> result = Emps.Select(e => new { e.Ename, e.Job, e.HireDate }).Union(Emps.Select(x => new { Ename = "Brak wartości", Job = (string)null, HireDate = (DateTime?)null }));
             return result;
         }
 
@@ -282,7 +283,8 @@ namespace LinqTutorials
         /// </summary>
         public static IEnumerable<object> Task11()
         {
-            IEnumerable<object> result = null;
+            IEnumerable<object> result = Emps.Join(Depts, e => e.Deptno, d => d.Deptno, (e, d) => new { e.Ename, e.Job, d.Dname })
+                .GroupBy(e => e.Dname).Select(e => new { Name = e.Key, numOfEmployees = e.Count() });
             return result;
         }
 
@@ -295,7 +297,7 @@ namespace LinqTutorials
         /// </summary>
         public static IEnumerable<Emp> Task12()
         {
-            IEnumerable<Emp> result = null;
+            IEnumerable<Emp> result = CustomExtensionMethods.GetEmpsWithSubordinates(Emps);
             return result;
         }
 
@@ -309,7 +311,7 @@ namespace LinqTutorials
         public static int Task13(int[] arr)
         {
             int result = 0;
-            //result=
+            result = arr.GroupBy(x => x).Where(x => x.Count() % 2 == 1).Select(x => x.Key).FirstOrDefault();
             return result;
         }
 
@@ -320,7 +322,7 @@ namespace LinqTutorials
         public static IEnumerable<Dept> Task14()
         {
             IEnumerable<Dept> result = null;
-            //result =
+            result = Depts.Where(d => d.Deptno.Equals(Depts.GroupBy(d => d.Deptno).Where(d => d.Count() == 5 || d.Count() == 0).Select(d => d.Key)));
             return result;
         }
     }
@@ -330,7 +332,8 @@ namespace LinqTutorials
         //Put your extension methods here
         public static IEnumerable<Emp> GetEmpsWithSubordinates(this IEnumerable<Emp> emps)
         {
-            var result = emps.Where(e => emps.Any(e2 => e2.Mgr == e.Mgr)).OrderBy(e => e.Ename).ThenByDescending(e => e.Salary);
+            //var result = emps.Where(e => emps.Any(e2 => e2.Mgr == e.Mgr)).OrderBy(e => e.Ename).ThenByDescending(e => e.Salary);
+            var result = emps.GroupBy(e=>e.Mgr).Where(e=>e.Key!=null).Select(x=>x.Key);
             return result;
         }
 
